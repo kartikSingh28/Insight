@@ -1,6 +1,6 @@
 const mongoose=require("mongoose");
 console.log("connected to");
-mongoose.connect("mongodb+srv://kartik:Kartik7500@cluster0.ojkylc8.mongodb.net/INSIGHT-app")
+
 const Schema=mongoose.Schema;
 const ObjectId=mongoose.Types.ObjectId;
 
