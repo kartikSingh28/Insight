@@ -1,38 +1,36 @@
-const { Router }=require("express");
+const { Router } = require("express");
+const adminRouter = Router();
+const { adminModel } = require("../db");
 
-const adminRouter=Router();
-
-
-adminRouter.post("/signup",(req,res)=>{
+adminRouter.post("/signup", (req, res) => {
     res.json({
-        message:"SignupEndPoint"
-    })
+        message: "SignupEndPoint"
+    });
 });
 
-adminRouter.post("/signin",(req,res)=>{
+adminRouter.post("/signin", (req, res) => {
     res.json({
-        message:"SignupEndPoint"
-    })
+        message: "SignupEndPoint"
+    });
 });
 
-adminRouter.post("/course",(req,res)=>{
+adminRouter.post("/course", (req, res) => {
     res.json({
-        message:"course endpoint"
-    })
+        message: "course endpoint"
+    });
 });
 
-adminRouter.put("/course",(req,res)=>{
+adminRouter.put("/course", (req, res) => {
     res.json({
-        message:"Course "
-    })
+        message: "Course "
+    });
 });
 
-adminRouter.get("/course/bulk",(req,res)=>{
+adminRouter.get("/course/bulk", (req, res) => {
     res.json({
-        message:"course purchaed are"
-    })
+        message: "course purchaed are"
+    });
 });
 
-module.exports({
-    adminRouter:adminRouter
-})
+// Correct export statement
+module.exports = { adminRouter };
