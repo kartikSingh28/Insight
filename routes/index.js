@@ -1,27 +1,12 @@
 const express=require("express");
+const { userRouter }=require("./routes/user");
 
 const app=express();
 
 app.use(express.json);
 
-app.post("/users/signup",(req,res)=>{
-    res.json({
-        message:"Signup endpoint"
-    })
 
-});
-
-app.post("/users/signin",(req,res)=>{
-    res.json({
-        message:"signIn end point"
-    })
-});
-
-app.get("/users/purchases",(req,res)=>{
-    res.json({
-        message:""
-    })
-});
+app.use("/user",userRouter);
 
 app.get("/course/purchase",(req,res)=>{
     res.json({
