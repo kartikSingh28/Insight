@@ -1,66 +1,52 @@
-const { Router }=require("express");
-const { userModel }=require("../db");
-const jwt=require("jsonwebtoken");
-const {JWT_USER_PASSWORD}=require("../config");
+const { Router } = require("express");
+const { userModel, purchaseModel, courseModel } = require("../db");
+const jwt = require("jsonwebtoken");
+const { JWT_USER_PASSWORD } = require("../config");
+const { userMiddleware } = require("../middleware/user");
+const bcrypt = require("bcrypt");
+const zod = require("zod");
 
-//importing zod and bcrypt for securing password
-const bcrypt=require("bcrypt");
-const zod=require("zod");
+const userRouter = Router();
 
-
-const userRouter=Router();
-
-userRouter.post("/signup",async (req,res)=>{
-
-    const requireBody=zod.object({
-        email:zod.string().email().min(5),
-        password:zod.string().min(5),
-        firstName:zod.string().min(3),
-        lastName:zod.string().min(3),
+// Signup
+userRouter.post("/signup", async (req, res) => {
+    const requireBody = zod.object({
+        email: zod.string().email().min(5),
+        password: zod.string().min(5),
+        firstName: zod.string().min(3),
+        lastName: zod.string().min(3),
     });
 
-    //parsing and validating the incoming req body dta
-    
-    const parseDataWithSuccess=requireBody.safeParse(req.body);
+    const parseDataWithSuccess = requireBody.safeParse(req.body);
 
-    if(!parseDataWithSuccess.success){
-        return res.json({
-            message:"Incoorect data format",
-            error:parseDataWithSuccess.error,
+    if (!parseDataWithSuccess.success) {
+        return res.status(400).json({
+            message: "Incorrect data format",
+            error: parseDataWithSuccess.error,
         });
     }
 
-    //extracting the validated and right email pass, first n last name from req.body
     const { email, password, firstName, lastName } = req.body;
-
-    //hashing the password using bcrypt with salt round=10
-
-    const hashedPassword= await bcrypt.hash(password,10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     try {
-        // add zod validation
-        //use bcrypt to hash the password
-
         await userModel.create({
-            email: email,
+            email,
             password: hashedPassword,
-            firstName: firstName,
-            lastName: lastName
+            firstName,
+            lastName,
         });
 
-        res.json({
-            message: "SignUp Succeded"
-        });
-
-    
+        res.json({ message: "SignUp Succeeded" });
     } catch (err) {
         res.status(500).json({
             message: "Error while signing up",
-            error: err.message
+            error: err.message,
         });
     }
 });
 
+// Signin
 userRouter.post("/signin", async (req, res) => {
     const requireBody = zod.object({
         email: zod.string().email(),
@@ -92,17 +78,39 @@ userRouter.post("/signin", async (req, res) => {
         const token = jwt.sign({ id: user._id }, JWT_USER_PASSWORD);
         res.json({ token });
     } catch (err) {
-        res.status(500).json({ message: "Something went wrong", error: err.message });
+        res.status(500).json({
+            message: "Something went wrong",
+            error: err.message,
+        });
     }
 });
 
+// Purchases
+userRouter.post("/purchases", userMiddleware, async (req, res) => {
+    try {
+        const userId = req.userId;
+        const purchases = await purchaseModel.find({ userId });
 
-userRouter.post("/purchases",(req,res)=>{
-    res.json({
-        message:"SignupEndPoint"
-    })
+        if (purchases.length === 0) {
+            return res.status(404).json({ message: "No purchases found" });
+        }
+
+        const purchaseCourseIds = purchases.map(p => p.courseId);
+
+        const coursesData = await courseModel.find({
+            _id: { $in: purchaseCourseIds },
+        });
+
+        return res.status(200).json({
+            purchases,
+            courses: coursesData,
+        });
+    } catch (err) {
+        return res.status(500).json({
+            message: "Error while fetching purchases",
+            error: err.message,
+        });
+    }
 });
 
-module.exports={
-    userRouter:userRouter
-}
+module.exports = { userRouter };
