@@ -71,15 +71,38 @@ adminRouter.post("/course", adminMiddleware, async (req, res) => {
     });
 });
 
-adminRouter.put("/course", (req, res) => {
+adminRouter.put("/course",adminMiddleware,async (req, res) => {
+    const adminId=req.userId;
+    // note course id=adminid otherwise diff creators can update and change prices of dif creators
+
+    const { title, description, imageUrl, price, courseId}=req.body;
+
+    const course=await courseModel.updateOne({
+        _id:courseId,// jaha pr ye course id hai waha update krdo
+        creatorId:adminId// note implemented here
+    },{
+        title:title,
+        description:description,
+        imageUrl:imageUrl,
+        price:price,
+        creatorId:adminId
+    })
     res.json({
-        message: "Course "
+        message:"Course updated",
+        courseId:course._id
     });
 });
 
-adminRouter.get("/course/bulk", (req, res) => {
+adminRouter.get("/course/bulk",adminMiddleware, async (req, res) => {
+
+    const adminId=req.userId;
+
+    const courses= await courseModel.find({
+        creatorId:adminId
+    });
     res.json({
-        message: "course purchaed are"
+        message: "course updated",
+        courses
     });
 });
 
