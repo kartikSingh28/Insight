@@ -1,3 +1,6 @@
+require('dotenv').config()// 0 dependency module
+
+
 const express=require("express");
 const mongoose=require("mongoose");
 const { userRouter }=require("./routes/user");
@@ -12,7 +15,7 @@ app.use("/api/v1/course",courseRouter);
 app.use("/api/v1/admin",adminRouter);
 
 async function main(){
-    await mongoose.connect("")
+    await mongoose.connect(process.env.MONGO_URL)
     app.listen(3000,()=>{
         console.log("Server started at port 3000");
     });
