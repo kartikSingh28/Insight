@@ -1,5 +1,4 @@
 const JWT_USER_PASSWORD="alad123";
-
 const JWT_ADMIN_PASSWORD="kartikritik001";
 
 module.exports={
